@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cyclone Impact Toolkit</title>
+    <link rel="stylesheet" href="css/app.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+</head>
+<body>
+    <div id="app">
+        <!-- Welcome Screen -->
+        <div id="welcome-screen" class="screen active">
+            <div class="container">
+                <div class="header">
+                    <h1>Welcome to ADB's Fishing Toolkit!</h1>
+                    <p class="subtitle">
+                        ADB's Fishing Toolkit helps analyze how tropical cyclones affect fishing activity. By combining satellite boat detections and cyclone tracks, it provides clear insights on disruptions across fishing grounds.
+                    </p>
+                </div>
+
+                <div class="mode-selection">
+                    <p class="call-to-action">Choose a mode of analysis to begin:</p>
+
+                    <div class="mode-buttons">
+                        <button id="historicalBtn" class="mode-btn">
+                            Historical
+                        </button>
+                        <button id="nowcastBtn" class="mode-btn">
+                            Nowcast
+                        </button>
+                    </div>
+                </div>
+
+                <footer class="footer">
+                    <div class="logos">
+                        <img src="shared/images/logos/logo.jpg" alt="ADB's Fishing Toolkit" class="main-logo">
+                    </div>
+                </footer>
+            </div>
+        </div>
+
+        <!-- Nowcast Configuration Screen -->
+        <div id="nowcast-config-screen" class="screen">
+            <div class="nowcast-container">
+                <div class="nowcast-header">
+                    <h1>Nowcast Mode</h1>
+                    <p class="nowcast-description">
+                        Generates assessments using current or synthetic cyclone data to evaluate immediate effects on fishing grounds.
+                    </p>
+                </div>
+
+                <div class="nowcast-form">
+                    <div class="form-group">
+                        <label for="countrySelect">Select Region:</label>
+                        <select id="countrySelect" class="nowcast-select" disabled>
+                            <option value="philippines" selected>Philippines</option>
+                            <option value="vietnam">Vietnam</option>
+                            <option value="thailand">Thailand</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Data Source:</label>
+                        <div class="data-source-segmented">
+                            <button class="data-source-btn active" data-source="ibtracs">
+                                IBTrACS (Default)
+                            </button>
+                            <button class="data-source-btn" data-source="synthetic">
+                                Synthetic
+                                <span class="upload-icon">↑</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="form-group" id="ibtracsDaysGroup" style="display: block;">
+                        <label for="ibtracsDaysInput">Days Lookback:</label>
+                        <input
+                            type="number"
+                            id="ibtracsDaysInput"
+                            class="nowcast-input"
+                            min="1"
+                            max="90"
+                            value="7"
+                            placeholder="7"
+                        >
+                        <p class="input-tip">Specify the number of days to look back for cyclone data (default: 7 days)</p>
+                    </div>
+
+                    <div class="nowcast-actions">
+                        <button id="backToWelcomeBtn" class="back-btn">Back</button>
+                        <button id="runNowcastBtn" class="run-btn">Run</button>
+                    </div>
+                </div>
+
+                <footer class="nowcast-footer">
+                    <div class="logos">
+                        <img src="shared/images/logos/logo.jpg" alt="ADB's Fishing Toolkit" class="main-logo">
+                    </div>
+                </footer>
+            </div>
+        </div>
+
+        <!-- Historical Configuration Screen -->
+        <div id="historical-config-screen" class="screen">
+            <div class="historical-container">
+                <div class="historical-header">
+                    <h1>Historical Mode</h1>
+                    <p class="historical-description">
+                        Provides comprehensive analysis of your cyclone events to understand long-term impacts on fishing activity.
+                    </p>
+                </div>
+
+                <div class="historical-form">
+                    <div class="form-group">
+                        <label for="historicalCountrySelect">Select Country:</label>
+                        <select id="historicalCountrySelect" class="historical-select">
+                            <option value="philippines">Philippines</option>
+                            <option value="vietnam">Vietnam</option>
+                            <option value="thailand">Thailand</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="yearSelect">Select Year:</label>
+                        <select id="yearSelect" class="historical-select">
+                            <option value="">Loading years...</option>
+                        </select>
+                    </div>
+
+                    <div class="historical-actions">
+                        <button id="backToWelcomeBtn2" class="back-btn">Back</button>
+                        <button id="runHistoricalBtn" class="run-btn">Run</button>
+                    </div>
+                </div>
+
+                <footer class="historical-footer">
+                    <div class="logos">
+                        <img src="shared/images/logos/logo.jpg" alt="ADB's Fishing Toolkit" class="main-logo">
+                    </div>
+                </footer>
+            </div>
+        </div>
+
+        <!-- Nowcast Loading Screen -->
+        <div id="nowcast-loading-screen" class="screen">
+            <div class="loading-container">
+                <div class="loading-content">
+                    <h1>Running Nowcast Analysis...</h1>
+                    <p id="nowcastLoadingMessage" class="loading-message">
+                        <span class="loading-spinner"></span>
+                        <span id="nowcastLoadingMessageText">Please wait while we process your inputs...</span>
+                    </p>
+                    <div class="loading-steps">
+                        <div class="step" id="nowcast-step1" data-phase="1">
+                            <div class="step-indicator"></div>
+                            <div class="step-content">
+                                <span class="step-text">Phase 1: Loading GIS data</span>
+                                <span class="step-badge"></span>
+                            </div>
+                        </div>
+                        <div class="step" id="nowcast-step2" data-phase="2">
+                            <div class="step-indicator"></div>
+                            <div class="step-content">
+                                <span class="step-text">Phase 2: Processing cyclone tracks</span>
+                                <span class="step-badge"></span>
+                            </div>
+                        </div>
+                        <div class="step" id="nowcast-step3" data-phase="3">
+                            <div class="step-indicator"></div>
+                            <div class="step-content">
+                                <span class="step-text">Phase 3: Calculating baselines and distances</span>
+                                <span class="step-badge"></span>
+                            </div>
+                        </div>
+                        <div class="step" id="nowcast-step4" data-phase="4">
+                            <div class="step-indicator"></div>
+                            <div class="step-content">
+                                <span class="step-text">Phase 4: Generating predictions</span>
+                                <span class="step-badge"></span>
+                            </div>
+                        </div>
+                        <div class="step" id="nowcast-step5" data-phase="5">
+                            <div class="step-indicator"></div>
+                            <div class="step-content">
+                                <span class="step-text">Phase 5: Creating visualizations and updating database</span>
+                                <span class="step-badge"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="loading-progress">
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="nowcastProgressFill">
+                                <div class="progress-shimmer"></div>
+                            </div>
+                        </div>
+                        <span class="progress-text" id="nowcastProgressText">0%</span>
+                    </div>
+                    <div class="loading-actions">
+                        <button id="cancelNowcastBtn" class="cancel-btn">Cancel</button>
+                    </div>
+                    <!-- Error Banner -->
+                    <div id="nowcastErrorBanner" class="error-banner" style="display: none;">
+                        <span id="nowcastErrorMessage"></span>
+                        <button id="closeNowcastErrorBanner" class="error-close-btn">×</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Nowcast Dashboard Screen -->
+        <div id="nowcast-dashboard-screen" class="screen">
+            <div class="dashboard-container">
+                <header class="dashboard-header">
+                    <div class="header-content">
+                        <button id="backToWelcomeBtn3" class="back-button">← Home</button>
+                        <h1>Nowcast Dashboard</h1>
+                    </div>
+                </header>
+
+                <div class="dashboard-app-container">
+                    <div class="app-header">
+                        <h2>Dashboard app</h2>
+                    </div>
+
+                    <!-- Controls Row -->
+                    <div class="controls-row">
+                        <div class="control-group">
+                            <label>Typhoon</label>
+                            <select id="typhoonSelect" class="control-select">
+                                <option value="">Loading typhoons...</option>
+                            </select>
+                        </div>
+                        <div class="control-group">
+                            <label>Date</label>
+                            <select id="dateSelect" class="control-select">
+                                <option value="">Loading dates...</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Content will be loaded here -->
+                    <div id="nowcast-content">
+                        <p>Loading nowcast data...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Historical Loading Screen -->
+        <div id="historical-loading-screen" class="screen">
+            <div class="loading-container">
+                <div class="loading-content">
+                    <h1>Running Historical Analysis...</h1>
+                    <p id="loadingMessage" class="loading-message">
+                        <span class="loading-spinner"></span>
+                        <span id="loadingMessageText">Please wait while we process your inputs...</span>
+                    </p>
+                    <div class="loading-steps">
+                        <div class="step" id="loading-step1" data-phase="1">
+                            <div class="step-indicator"></div>
+                            <div class="step-content">
+                                <span class="step-text">Phase 1: Downloading and processing VIIRS data</span>
+                                <span class="step-badge"></span>
+                            </div>
+                        </div>
+                        <div class="step" id="loading-step2" data-phase="2">
+                            <div class="step-indicator"></div>
+                            <div class="step-content">
+                                <span class="step-text">Phase 2: Processing cyclone track data</span>
+                                <span class="step-badge"></span>
+                            </div>
+                        </div>
+                        <div class="step" id="loading-step3" data-phase="3">
+                            <div class="step-indicator"></div>
+                            <div class="step-content">
+                                <span class="step-text">Phase 3: Determining fishing grounds</span>
+                                <span class="step-badge"></span>
+                            </div>
+                        </div>
+                        <div class="step" id="loading-step4" data-phase="4">
+                            <div class="step-indicator"></div>
+                            <div class="step-content">
+                                <span class="step-text">Phase 4: Generating visualizations</span>
+                                <span class="step-badge"></span>
+                            </div>
+                        </div>
+                        <div class="step" id="loading-step5" data-phase="5">
+                            <div class="step-indicator"></div>
+                            <div class="step-content">
+                                <span class="step-text">Phase 5: Updating database</span>
+                                <span class="step-badge"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="loading-progress">
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="progressFill">
+                                <div class="progress-shimmer"></div>
+                            </div>
+                        </div>
+                        <span class="progress-text" id="progressText">0%</span>
+                    </div>
+                    <div class="loading-actions">
+                        <button id="cancelAnalysisBtn" class="cancel-btn">Cancel</button>
+                    </div>
+                    <!-- Error Banner -->
+                    <div id="errorBanner" class="error-banner" style="display: none;">
+                        <span id="errorMessage"></span>
+                        <button id="closeErrorBanner" class="error-close-btn">×</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Historical Dashboard Screen -->
+        <div id="historical-dashboard-screen" class="screen">
+            <div class="dashboard-container">
+                <header class="dashboard-header">
+                    <div class="header-content">
+                        <button id="backToWelcomeBtn4" class="back-button">← Home</button>
+                        <h1>Historical Dashboard</h1>
+                    </div>
+                </header>
+
+                <div class="dashboard-app-container">
+                    <div class="app-header">
+                        <h2>Dashboard app</h2>
+                    </div>
+
+                    <!-- Year Filter Row -->
+                    <div class="year-filter-row">
+                        <div class="year-filter-container">
+                            <label for="yearSelector" class="year-filter-label">
+                                Select Year:
+                            </label>
+                            <select id="yearSelector" class="year-selector">
+                                <option value="">Select Year...</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Content will be loaded here -->
+                    <div id="historical-content">
+                        <p>Loading historical data...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Synthetic Typhoon Track Modal -->
+    <div id="syntheticModal" class="synthetic-modal">
+        <div class="synthetic-modal-content">
+            <h3 class="synthetic-modal-title">Synthetic Typhoon Track:</h3>
+
+            <!-- Segmented Control for Upload/Draw -->
+            <div class="synthetic-segmented">
+                <button class="synthetic-source-btn active" data-tab="upload">Upload</button>
+                <button class="synthetic-source-btn" data-tab="draw">Draw</button>
+            </div>
+
+            <!-- Tab Content -->
+            <div class="synthetic-tab-content">
+                <!-- Upload Tab -->
+                <div id="uploadTab" class="tab-panel">
+                    <div class="file-upload-container">
+                        <input type="file" id="trackFileInput" class="file-input" accept=".zip">
+                        <label for="trackFileInput" class="file-input-label">
+                            <span class="file-input-text">Choose File</span>
+                            <span class="file-input-icon">📎</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Draw Tab -->
+                <div id="drawTab" class="tab-panel" style="display: none;">
+                    <div id="drawTabStatus" class="draw-tab-status">
+                        <p>Click "Draw" to open the track drawer.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal Actions -->
+            <div class="synthetic-modal-actions">
+                <button id="syntheticBackBtn" class="synthetic-btn secondary">Back</button>
+                <button id="syntheticProceedBtn" class="synthetic-btn primary">Proceed</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Track Drawer Full-Screen Modal -->
+    <div id="trackDrawerModal" class="track-drawer-modal">
+        <div id="trackDrawerLoadingOverlay" class="track-drawer-loading-overlay">
+            <div style="text-align: center;">
+                <div class="track-drawer-loading-spinner"></div>
+                <div class="track-drawer-loading-text">Loading map...</div>
+            </div>
+        </div>
+
+        <div class="track-drawer-container">
+            <div class="track-drawer-header">
+                <h3>Draw Typhoon Track</h3>
+                <button id="trackDrawerCloseBtn" class="track-drawer-close-btn">×</button>
+            </div>
+
+            <div class="track-drawer-controls">
+                <button onclick="trackDrawer.togglePointMode()" id="trackDrawerPointButton" class="track-drawer-btn">Add Points</button>
+                <button onclick="trackDrawer.clearTrack()" class="track-drawer-btn">Clear Track</button>
+                <button onclick="trackDrawer.downloadTrack()" class="track-drawer-btn">Download Track</button>
+            </div>
+
+            <div id="trackDrawerMap" class="track-drawer-map"></div>
+
+            <!-- Floating Track Data Panel -->
+            <div id="trackDrawerFloatingPanel" class="track-drawer-floating-panel">
+                <div class="track-drawer-panel-header">
+                    <h3 class="track-drawer-panel-title">Track Points (<span id="trackDrawerPointCount">0</span>)</h3>
+                </div>
+                <div class="track-drawer-panel-content">
+                    <div id="trackDrawerTableContainer">
+                        <div class="track-drawer-no-data">No track points added yet.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Point Data Modal -->
+        <div id="trackDrawerPointModal" class="track-drawer-point-modal-overlay">
+            <div class="track-drawer-point-modal">
+                <div class="track-drawer-point-modal-header">
+                    <h3 class="track-drawer-point-modal-title">Add Point Data</h3>
+                </div>
+                <form id="trackDrawerPointForm">
+                    <div class="track-drawer-form-group">
+                        <label class="track-drawer-form-label" for="trackDrawerDateInput">Date</label>
+                        <input type="date" id="trackDrawerDateInput" class="track-drawer-form-input" required>
+                    </div>
+                    <div class="track-drawer-form-group">
+                        <label class="track-drawer-form-label" for="trackDrawerHourInput">Hour (UTC)</label>
+                        <select id="trackDrawerHourInput" class="track-drawer-form-input" required>
+                            <option value="">Select hour</option>
+                            <option value="00">00:00</option>
+                            <option value="03">03:00</option>
+                            <option value="06">06:00</option>
+                            <option value="09">09:00</option>
+                            <option value="12">12:00</option>
+                            <option value="15">15:00</option>
+                            <option value="18">18:00</option>
+                            <option value="21">21:00</option>
+                        </select>
+                    </div>
+                    <div class="track-drawer-form-group">
+                        <label class="track-drawer-form-label" for="trackDrawerCycloneSpeed">Cyclone Speed (kts)</label>
+                        <input type="number" id="trackDrawerCycloneSpeed" class="track-drawer-form-input" step="0.1" min="0" required>
+                    </div>
+                    <div class="track-drawer-form-group">
+                        <label class="track-drawer-form-label" for="trackDrawerWindSpeed">Wind Speed (kts)</label>
+                        <input type="number" id="trackDrawerWindSpeed" class="track-drawer-form-input" step="0.1" min="0" required>
+                    </div>
+                    <div class="track-drawer-point-modal-actions">
+                        <button type="button" class="track-drawer-btn-secondary" onclick="trackDrawer.cancelPoint()">Cancel</button>
+                        <button type="submit" class="track-drawer-btn-primary">Add Point</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>

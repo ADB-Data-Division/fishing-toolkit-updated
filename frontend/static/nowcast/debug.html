@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PyWebView API Debug</title>
+</head>
+<body>
+    <h1>PyWebView API Debug</h1>
+    <div id="status">Checking API availability...</div>
+    <button onclick="testAPI()">Test API</button>
+    <div id="results"></div>
+
+    <script>
+        function testAPI() {
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = '<h3>Testing API...</h3>';
+            
+            // Check if pywebview is available
+            if (typeof window.pywebview !== 'undefined') {
+                resultsDiv.innerHTML += '<p>✅ window.pywebview is available</p>';
+                
+                if (window.pywebview.api) {
+                    resultsDiv.innerHTML += '<p>✅ window.pywebview.api is available</p>';
+                    
+                    // Test getting dashboard data
+                    try {
+                        window.pywebview.api.get_dashboard_data().then(data => {
+                            resultsDiv.innerHTML += '<p>✅ get_dashboard_data() successful</p>';
+                            resultsDiv.innerHTML += '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
+                        }).catch(error => {
+                            resultsDiv.innerHTML += '<p>❌ get_dashboard_data() failed: ' + error + '</p>';
+                        });
+                    } catch (error) {
+                        resultsDiv.innerHTML += '<p>❌ get_dashboard_data() error: ' + error + '</p>';
+                    }
+                    
+                } else {
+                    resultsDiv.innerHTML += '<p>❌ window.pywebview.api is NOT available</p>';
+                }
+            } else {
+                resultsDiv.innerHTML += '<p>❌ window.pywebview is NOT available</p>';
+            }
+        }
+        
+        // Check API availability on page load
+        window.addEventListener('load', () => {
+            const statusDiv = document.getElementById('status');
+            
+            if (typeof window.pywebview !== 'undefined') {
+                statusDiv.innerHTML = '✅ PyWebView API is available';
+                statusDiv.style.color = 'green';
+            } else {
+                statusDiv.innerHTML = '❌ PyWebView API is NOT available';
+                statusDiv.style.color = 'red';
+            }
+        });
+    </script>
+</body>
+</html>
+

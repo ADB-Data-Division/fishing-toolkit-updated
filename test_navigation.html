@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Navigation Test - Cyclone Impact Toolkit</title>
+    <link rel="stylesheet" href="frontend/static/css/app.css">
+</head>
+<body>
+    <div id="app">
+        <!-- Welcome Screen -->
+        <div id="welcome-screen" class="screen active">
+            <div class="container">
+                <div class="header">
+                    <h1>Welcome to the</h1>
+                    <h2>Tropical Cyclone Impact Assessment Toolkit for Fishing Activities!</h2>
+                    <p class="subtitle">
+                        This tool provides comprehensive analysis of typhoon impacts on fishing grounds, 
+                        with cyclone tracking data to optimize daily decision-making and minimize financial losses.
+                    </p>
+                </div>
+
+                <div class="mode-selection">
+                    <h3>Select a mode of analysis to begin:</h3>
+                    
+                    <div class="mode-buttons">
+                        <button id="historicalBtn" class="mode-btn historical-btn">
+                            <span class="btn-label">Historical</span>
+                        </button>
+                        <button id="nowcastBtn" class="mode-btn nowcast-btn">
+                            <span class="btn-label">Nowcast</span>
+                        </button>
+                    </div>
+
+                    <p class="helper-text">Not sure what mode to choose?</p>
+                </div>
+
+                <footer class="footer">
+                    <div class="logos">
+                        <div class="logo">World Bank</div>
+                        <div class="logo">JFPR</div>
+                        <div class="logo">Partner</div>
+                    </div>
+                </footer>
+            </div>
+        </div>
+
+        <!-- Nowcast Configuration Screen -->
+        <div id="nowcast-config-screen" class="screen">
+            <div class="container">
+                <div class="config-header">
+                    <button id="backToWelcomeBtn" class="back-button">← Back</button>
+                    <h1>Nowcast Mode</h1>
+                    <p class="config-description">
+                        Generates assessments using current or synthetic cyclone data to evaluate immediate effects on fishing grounds.
+                    </p>
+                </div>
+
+                <div class="config-form">
+                    <div class="form-group">
+                        <label for="countrySelect">Select Country:</label>
+                        <select id="countrySelect" class="form-select">
+                            <option value="philippines">Philippines</option>
+                            <option value="vietnam">Vietnam</option>
+                            <option value="thailand">Thailand</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Data Source:</label>
+                        <div class="radio-group">
+                            <label class="radio-label">
+                                <input type="radio" name="dataSource" value="ibtracs" checked>
+                                <span>IBTACS (Default)</span>
+                            </label>
+                            <label class="radio-label">
+                                <input type="radio" name="dataSource" value="synthetic">
+                                <span>Synthetic</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button id="runNowcastBtn" class="run-button">Run Nowcast Analysis</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Nowcast Dashboard Screen -->
+        <div id="nowcast-dashboard-screen" class="screen">
+            <div class="dashboard-container">
+                <header class="dashboard-header">
+                    <div class="header-content">
+                        <button id="backToWelcomeBtn3" class="back-button">← Home</button>
+                        <h1>Nowcast Dashboard</h1>
+                    </div>
+                </header>
+
+                <div class="dashboard-app-container">
+                    <div class="app-header">
+                        <h2>Dashboard app</h2>
+                    </div>
+
+                    <div id="nowcast-content">
+                        <div class="dashboard-content">
+                            <h3>Nowcast Dashboard Ready</h3>
+                            <p>Select a typhoon and date to view analysis results.</p>
+                            <div class="stats">
+                                <div class="stat">
+                                    <span class="stat-label">Available Typhoons:</span>
+                                    <span class="stat-value">5</span>
+                                </div>
+                                <div class="stat">
+                                    <span class="stat-label">Fishing Grounds:</span>
+                                    <span class="stat-value">6</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="frontend/static/js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,114 @@
+{
+  "co-may": {
+    "name": "CO-MAY",
+    "type": "TY",
+    "dateRange": "2025-July-23 to 2025-July-25",
+    "date": "2025-July-23",
+    "metrics": {
+      "avgStormSpeed": "16 knots",
+      "maxStormSpeed": "32 knots",
+      "maxWindSpeed": "70 knots",
+      "closestGround": "Ground 3",
+      "minDistance": "456.1 km"
+    },
+    "boatCounts": {
+      "baseline": [25, 60, 35, 85],
+      "predicted": [20, 55, 30, 80]
+    },
+    "distances": [350, 600, 300, 800],
+    "activityDifference": ["+200%", "-20.63%", "-35.19%", "+2.70%"],
+    "track": [
+      {
+        "lat": 14.5995,
+        "lng": 120.9842,
+        "datetime": "2025-07-23 06:00",
+        "windSpeed": 65,
+        "cycloneSpeed": 15
+      },
+      {
+        "lat": 15.2000,
+        "lng": 121.5000,
+        "datetime": "2025-07-23 12:00",
+        "windSpeed": 70,
+        "cycloneSpeed": 16
+      },
+      {
+        "lat": 15.8000,
+        "lng": 122.1000,
+        "datetime": "2025-07-24 00:00",
+        "windSpeed": 68,
+        "cycloneSpeed": 14
+      },
+      {
+        "lat": 16.4000,
+        "lng": 122.8000,
+        "datetime": "2025-07-24 12:00",
+        "windSpeed": 65,
+        "cycloneSpeed": 12
+      },
+      {
+        "lat": 17.0000,
+        "lng": 123.5000,
+        "datetime": "2025-07-25 00:00",
+        "windSpeed": 60,
+        "cycloneSpeed": 10
+      }
+    ]
+  },
+  "butchoy": {
+    "name": "BUTCHOY",
+    "type": "TS",
+    "dateRange": "2025-July-20 to 2025-July-22",
+    "date": "2025-July-20",
+    "metrics": {
+      "avgStormSpeed": "22 knots",
+      "maxStormSpeed": "45 knots",
+      "maxWindSpeed": "95 knots",
+      "closestGround": "Ground 1",
+      "minDistance": "312.7 km"
+    },
+    "boatCounts": {
+      "baseline": [30, 45, 70, 55],
+      "predicted": [40, 60, 25, 75]
+    },
+    "distances": [520, 312, 680, 450],
+    "activityDifference": ["+33.3%", "+33.3%", "-64.3%", "+36.4%"],
+    "track": [
+      {
+        "lat": 12.5000,
+        "lng": 123.0000,
+        "datetime": "2025-07-20 06:00",
+        "windSpeed": 85,
+        "cycloneSpeed": 20
+      },
+      {
+        "lat": 13.2000,
+        "lng": 122.5000,
+        "datetime": "2025-07-20 12:00",
+        "windSpeed": 90,
+        "cycloneSpeed": 22
+      },
+      {
+        "lat": 13.9000,
+        "lng": 122.0000,
+        "datetime": "2025-07-21 00:00",
+        "windSpeed": 95,
+        "cycloneSpeed": 24
+      },
+      {
+        "lat": 14.6000,
+        "lng": 121.5000,
+        "datetime": "2025-07-21 12:00",
+        "windSpeed": 88,
+        "cycloneSpeed": 20
+      },
+      {
+        "lat": 15.3000,
+        "lng": 121.0000,
+        "datetime": "2025-07-22 00:00",
+        "windSpeed": 75,
+        "cycloneSpeed": 18
+      }
+    ]
+  }
+}

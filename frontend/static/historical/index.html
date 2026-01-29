@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Typhoon Impact Dashboard</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="css/dashboard.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Header -->
+        <header class="dashboard-header">
+            <div class="header-content">
+                <button id="backToHomeBtn" class="back-button" title="Back to Home">← Home</button>
+                <h1>Typhoon Impact Dashboard</h1>
+            </div>
+        </header>
+
+        <!-- Dashboard App Container -->
+        <div class="dashboard-app-container">
+            <div class="app-header">
+                <h2>Dashboard app</h2>
+            </div>
+
+
+
+            <!-- Year Filter Row -->
+            <div class="year-filter-row">
+                <div class="year-filter-container">
+                    <label for="yearSelector" class="year-filter-label">
+                        Select Year:
+                    </label>
+                    <select id="yearSelector" class="year-selector">
+                        <option value="">Select Year...</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Summary Cards Row -->
+            <div class="summary-row">
+                <div class="summary-card">
+                    <div class="summary-title">Most Disruptive Typhoon</div>
+                    <div class="summary-value">-</div>
+                    <div class="summary-description">Largest average drop in boat activity</div>
+                </div>
+                <div class="summary-card">
+                    <div class="summary-title">Closest Typhoon</div>
+                    <div class="summary-value">-</div>
+                    <div class="summary-description">Closest typhoon from all fishing grounds</div>
+                </div>
+                <div class="summary-card">
+                    <div class="summary-title">Highest Storm Speed</div>
+                    <div class="summary-value">-</div>
+                    <div class="summary-description">Highest storm speed recorded</div>
+                </div>
+            </div>
+
+            <!-- Main Content Area -->
+            <div class="main-content">
+                <!-- Left Column -->
+                <div class="left-column">
+                    <!-- Boat % Difference Chart -->
+                    <div class="chart-section">
+                        <div class="chart-header">
+                            <h3>Boat % Difference per Fishing Ground</h3>
+                            <div class="filter-controls">
+                                <select id="typhoonSelector" class="typhoon-selector">
+                                    <option value="">Select Typhoon...</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="boatDifferenceChart" width="400" height="300"></canvas>
+                        </div>
+                        <div class="chart-legend">
+                            <div class="legend-item">
+                                <div class="legend-color baseline"></div>
+                                <span>Baseline (Average Daily Boats)</span>
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-color diff-combined"></div>
+                                <span>% Difference (Increase / Decrease)</span>
+                            </div>
+                        </div>
+                        <div class="chart-note">
+                            <strong>Boat Difference</strong> is calculated by comparing the average number of boats per ground with the number of boats recorded when the typhoon was closest to the center of the fishing ground.
+                        </div>
+                    </div>
+
+
+                </div>
+
+                <!-- Right Column -->
+                <div class="right-column">
+                    <!-- Map Section -->
+                    <div class="map-section">
+                        <div class="map-header">
+                            <h3 id="mapHeader">Fishing Grounds in 2024</h3>
+                            <div class="map-legend">
+                                <div class="legend-item">
+                                    <div class="legend-dot fishing-dot"></div>
+                                    <span>Fishing Grounds</span>
+                                </div>
+                                <div class="legend-item">
+                                    <div class="legend-dot boat-dot"></div>
+                                    <span>Fishing Boats Detected</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="map" class="map"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bottom Row - Three Sections Side by Side -->
+            <div class="bottom-row">
+                <!-- Storm Speed Table -->
+                <div class="table-section">
+                    <h3>Storm Speed by Typhoon (knots)</h3>
+                    <table class="speed-table" id="speedTable">
+                        <thead>
+                            <tr>
+                                <th>Typhoon</th>
+                                <th>Average</th>
+                                <th>Maximum</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Data will be populated by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Average Boat Count Chart -->
+                <div class="chart-section">
+                    <h3>Ave Number of Fishing Boats Detected (All Fishing Grounds)</h3>
+                    <div class="chart-container small">
+                        <canvas id="averageBoatChart" width="400" height="200"></canvas>
+                    </div>
+                </div>
+
+                <!-- Minimum Distance Table -->
+                <div class="table-section">
+                    <h3>Minimum Distance by Typhoon (km)</h3>
+                    <table class="distance-table-compact" id="distanceTableBottom">
+                        <thead>
+                            <tr>
+                                <th>Frame</th>
+                                <th>0</th>
+                                <th>1</th>
+                                <th>2</th>
+                                <th>3</th>
+                                <th>4</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Data will be populated by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="js/dashboard.js"></script>
+</body>
+</html>

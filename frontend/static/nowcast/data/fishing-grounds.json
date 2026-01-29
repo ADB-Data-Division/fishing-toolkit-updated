@@ -1,0 +1,30 @@
+[
+  {
+    "id": 0,
+    "name": "Ground 0",
+    "lat": 14.2000,
+    "lng": 121.0000,
+    "description": "Northern fishing area with moderate boat activity"
+  },
+  {
+    "id": 1,
+    "name": "Ground 1",
+    "lat": 15.5000,
+    "lng": 120.5000,
+    "description": "Northwestern coastal fishing zone"
+  },
+  {
+    "id": 2,
+    "name": "Ground 2",
+    "lat": 13.8000,
+    "lng": 122.5000,
+    "description": "Eastern deep water fishing ground"
+  },
+  {
+    "id": 3,
+    "name": "Ground 3",
+    "lat": 16.2000,
+    "lng": 122.0000,
+    "description": "Northern deep sea fishing area"
+  }
+]
