@@ -185,7 +185,7 @@ uv run python -m pytest tests/
 
 ## License
 
-This project is part of the ADB and JFPR for tropical cyclone impact assessment.
+This research was funded by the Japan Fund for Prosperous and Resilient Asia and the Pacific (Government of Japan) through the Asian Development Bank.
 
 ## Support
 
