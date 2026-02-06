@@ -9,6 +9,10 @@ The Cyclone Impact Toolkit provides comprehensive analysis of typhoon impacts on
 - **Historical Mode**: Analyze past typhoon events and their long-term impacts on fishing activity
 - **Nowcast Mode**: Real-time typhoon tracking and immediate impact assessment
 
+## Data Source
+1. Fishing activity data are retrieved from the Visible Infrared Imaging Radiometer Suite (VIIRS) satellite imagery of the [Colorado School of Mines](https://eogauth-new.mines.edu/realms/eog/protocol/openid-connect/auth?response_type=code&scope=openid%20email&client_id=eogdata-new-apache&state=_YbW0R8Gcy5ChuupI3wDGUi3oJY&redirect_uri=https://eogdata.mines.edu/oauth2callback&nonce=yiVqlLQWyMEHEHrLORMdiOuTbnHVhc3xvODFcx6eEpA).
+2. Cyclone track and intensity data are sourced from the [International Best Track Archive for Climate Stewardship (IBTrACS)](https://www.ncei.noaa.gov/data/international-best-track-archive-for-climate-stewardship-ibtracs/v04r01/access/shapefile/). 
+
 ## Features
 
 ### Historical Analysis
