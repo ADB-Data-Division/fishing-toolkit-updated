@@ -7,8 +7,9 @@ A unified desktop application for analyzing tropical cyclone impacts on fishing 
 ## Overview
 
 The Cyclone Impact Toolkit integrates satellite-derived fishing activity and cyclone track data to quantify how storms disrupt fishing behavior. It provides two complementary analysis modes:
-	•	Historical Mode — retrospective assessment of past cyclone impacts on fishing activity using observed satellite detections
-	•	Nowcast Mode — near real-time estimation of cyclone impacts using current storm characteristics and pre-trained regression models
+
+- Historical Mode - retrospective assessment of past cyclone impacts on fishing activity using observed satellite detections
+- Nowcast Mode -  near real-time estimation of cyclone impacts using current storm characteristics and pre-trained regression models
 
 The toolkit is designed as a plug-and-play desktop application that runs locally without requiring advanced technical setup.
 
@@ -21,7 +22,7 @@ Users must register for an EOG account to access VBD data. The toolkit authentic
 ## Features
 
 ### Historical Analysis
-- Year-based filtering (2023-2025)
+- Year-based filtering
 - Fishing ground identification per typhoon using satellite detections
 - Typhoon impact assessment
 - Interactive charts and visualizations
@@ -32,6 +33,7 @@ Users must register for an EOG account to access VBD data. The toolkit authentic
 - Regression-based prediction of fishing activity disruption
 - Rapid impact summaries for decision support
 - Interactive visualization of cyclone tracks and fishing grounds
+  Data export capabilities
 
 ### Unified Interface
 - Welcome screen with mode selection
@@ -70,7 +72,7 @@ frontend/
 ## Installation
 
 ### Requirements
-- Windows operating system (recommended) for the standalone toolkit
+- Windows operating system for the standalone toolkit (recommended) 
 - No additional software installation required for packaged release
 
 ### Prerequisites
@@ -127,14 +129,14 @@ frontend/
 ### Historical Mode
 
 1. Click "Historical" → Configuration screen
-2. Select country and year (2023-2025)
+2. Select country and year
 3. Click "Run Historical Analysis"
 4. View dashboard with typhoon data and impact analysis
 
 ### Nowcast Mode
 
 1. Click "Nowcast" → Configuration screen
-2. Select country and data source (IBTACS or Synthetic)
+2. Select country and data source (IBTrACS or Synthetic)
 3. For synthetic: upload CSV/Shapefile data
 4. Click "Run Nowcast Analysis"
 5. View dashboard with real-time typhoon tracking
