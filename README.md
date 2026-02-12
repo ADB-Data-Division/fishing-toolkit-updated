@@ -1,39 +1,44 @@
 # Cyclone Impact Toolkit
 
-A unified desktop application for analyzing tropical cyclone impacts on fishing activities, combining historical analysis and real-time nowcast capabilities. You may download the toolkit application [here](https://drive.google.com/drive/folders/1ZYD-M4C-ra8Evb2W5l2rlbEhM-UskqYk).
+A unified desktop application for analyzing tropical cyclone impacts on fishing activities, combining historical analysis and real-time nowcast capabilities. 
+
+👉 You may download the toolkit application [here](https://drive.google.com/drive/folders/1ZYD-M4C-ra8Evb2W5l2rlbEhM-UskqYk).
 
 ## Overview
 
-The Cyclone Impact Toolkit provides comprehensive analysis of typhoon impacts on fishing grounds through two distinct modes:
+The Cyclone Impact Toolkit integrates satellite-derived fishing activity and cyclone track data to quantify how storms disrupt fishing behavior. It provides two complementary analysis modes:
+	•	Historical Mode — retrospective assessment of past cyclone impacts on fishing activity using observed satellite detections
+	•	Nowcast Mode — near real-time estimation of cyclone impacts using current storm characteristics and pre-trained regression models
 
-- **Historical Mode**: Analyze past typhoon events and their long-term impacts on fishing activity
-- **Nowcast Mode**: Real-time typhoon tracking and immediate impact assessment
+The toolkit is designed as a plug-and-play desktop application that runs locally without requiring advanced technical setup.
 
 ## Data Source
 1. Fishing activity data are retrieved from the Visible Infrared Imaging Radiometer Suite (VIIRS) satellite imagery of the [Colorado School of Mines](https://eogauth-new.mines.edu/realms/eog/protocol/openid-connect/auth?response_type=code&scope=openid%20email&client_id=eogdata-new-apache&state=_YbW0R8Gcy5ChuupI3wDGUi3oJY&redirect_uri=https://eogdata.mines.edu/oauth2callback&nonce=yiVqlLQWyMEHEHrLORMdiOuTbnHVhc3xvODFcx6eEpA).
 2. Cyclone track and intensity data are sourced from the [International Best Track Archive for Climate Stewardship (IBTrACS)](https://www.ncei.noaa.gov/data/international-best-track-archive-for-climate-stewardship-ibtracs/v04r01/access/shapefile/). 
 
+Users must register for an EOG account to access VBD data. The toolkit authenticates downloads locally using user credentials and relies exclusively on the FINAL VBD dataset.
+
 ## Features
 
 ### Historical Analysis
 - Year-based filtering (2023-2025)
-- Comprehensive typhoon impact data
-- Fishing ground analysis per typhoon
+- Fishing ground identification per typhoon using satellite detections
+- Typhoon impact assessment
 - Interactive charts and visualizations
 - Data export capabilities
 
 ### Nowcast Analysis
-- Real-time typhoon tracking
-- CSV and Shapefile data upload
-- Dynamic fishing ground impact assessment
-- Live typhoon track visualization
-- Immediate decision support
+- Integration of recent (from IBTrACS) or synthetic (user-upload) cyclone tracks
+- Regression-based prediction of fishing activity disruption
+- Rapid impact summaries for decision support
+- Interactive visualization of cyclone tracks and fishing grounds
 
 ### Unified Interface
 - Welcome screen with mode selection
 - Consistent user experience across modes
 - Shared fishing grounds data (where applicable)
 - Single application deployment
+- Local storage of outputs for reproducibility
 
 ## Architecture
 
@@ -63,6 +68,10 @@ frontend/
 - **Back Navigation**: Return to welcome screen from any mode
 
 ## Installation
+
+### Requirements
+- Windows operating system (recommended) for the standalone toolkit
+- No additional software installation required for packaged release
 
 ### Prerequisites
 - Python 3.12+
@@ -129,18 +138,6 @@ frontend/
 3. For synthetic: upload CSV/Shapefile data
 4. Click "Run Nowcast Analysis"
 5. View dashboard with real-time typhoon tracking
-
-## Data Sources
-
-### Historical Data
-- Pre-loaded CSV files with typhoon impact data
-- Track data from sample files
-- Fishing ground definitions per typhoon
-
-### Nowcast Data
-- User-uploaded CSV files with daily predictions
-- Shapefile track data
-- Static fishing grounds GeoJSON
 
 ## Database Structure
 
