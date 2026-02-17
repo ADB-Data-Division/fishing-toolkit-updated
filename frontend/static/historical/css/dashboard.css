@@ -438,7 +438,7 @@ body {
 }
 
 .boat-dot {
-    background: #9c27b0;
+    background: #9333ea;
 }
 
 #map {
@@ -457,16 +457,16 @@ body {
         grid-template-columns: 1fr;
         gap: 20px;
     }
-    
+
     .bottom-row {
         grid-template-columns: 1fr;
         gap: 15px;
     }
-    
+
     .summary-row {
         grid-template-columns: repeat(3, 1fr);
     }
-    
+
     #map {
         height: 300px;
     }
@@ -476,7 +476,7 @@ body {
     .summary-row {
         grid-template-columns: repeat(2, 1fr);
     }
-    
+
     .bottom-row {
         grid-template-columns: 1fr;
         gap: 15px;
@@ -487,11 +487,11 @@ body {
     .summary-row {
         grid-template-columns: 1fr;
     }
-    
+
     .dashboard-app-container {
         padding: 15px;
     }
-    
+
     .bottom-row {
         grid-template-columns: 1fr;
         gap: 15px;

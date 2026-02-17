@@ -1,7 +1,11 @@
 """Historical API for PyWebView communication."""
 
+import json
+import os
 import threading
 from typing import Any
+
+import pandas as pd
 
 from backend.utils.logger import get_logger
 
@@ -139,6 +143,67 @@ class HistoricalApi(BaseApi):
             logger.error(f"Error getting fishing grounds: {e}")
             return []
 
+    def get_boat_detections_geojson(self, year: int, sample_size: int = 5000) -> dict[str, Any] | None:
+        """Load boat detection points and convert to GeoJSON.
+
+        Args:
+            year: Year to load data for
+            sample_size: Number of random points to sample (default 5000 for performance)
+
+        Returns:
+            GeoJSON FeatureCollection or None if file not found
+        """
+        try:
+            # Build path to boat detections CSV
+            boat_csv_path = os.path.join(
+                os.path.dirname(os.path.dirname(os.path.dirname(__file__))),
+                "data",
+                "outputs",
+                "historical",
+                "phl",
+                str(year),
+                "intermediate",
+                f"df_all_b_phl_{year}.csv",
+            )
+
+            if not os.path.exists(boat_csv_path):
+                logger.warning(f"Boat detections file not found: {boat_csv_path}")
+                return None
+
+            # Load CSV
+            logger.info(f"Loading boat detections from {boat_csv_path}")
+            df = pd.read_csv(boat_csv_path)
+
+            # Sample data if too large
+            if len(df) > sample_size:
+                logger.info(f"Sampling {sample_size} points from {len(df)} total boat detections")
+                df = df.sample(n=sample_size, random_state=42)
+
+            # Convert to GeoJSON
+            features = []
+            for _, row in df.iterrows():
+                feature = {
+                    "type": "Feature",
+                    "geometry": {
+                        "type": "Point",
+                        "coordinates": [row["Lon_DNB"], row["Lat_DNB"]],
+                    },
+                    "properties": {"date": str(row["date_only"]) if pd.notna(row["date_only"]) else None},
+                }
+                features.append(feature)
+
+            geojson = {"type": "FeatureCollection", "features": features}
+
+            logger.info(f"Converted {len(features)} boat detections to GeoJSON")
+            return geojson
+
+        except Exception as e:
+            logger.error(f"Error loading boat detections for year {year}: {e}")
+            import traceback
+
+            traceback.print_exc()
+            return None
+
     def get_available_years(self) -> list[int]:
         """Get all available years from the database.
 
@@ -190,16 +255,62 @@ class HistoricalApi(BaseApi):
             # Get typhoons for specific year
             typhoons = self.get_typhoons_by_year(year)
 
-            # Get fishing grounds (same for all years)
-            fishing_grounds = self.get_fishing_grounds()
+            # Try to load fishing grounds GeoJSON for this year
+            fishing_grounds_geojson = None
+            boat_detections_path = None
 
-            dashboard_data = {"typhoons": typhoons, "fishing_grounds": fishing_grounds}
+            geojson_path = os.path.join(
+                os.path.dirname(os.path.dirname(os.path.dirname(__file__))),
+                "data",
+                "outputs",
+                "historical",
+                "phl",
+                str(year),
+                "intermediate",
+                f"phl_merged_dense_area_polygons_{year}.geojson",
+            )
+
+            if os.path.exists(geojson_path):
+                try:
+                    with open(geojson_path) as f:
+                        fishing_grounds_geojson = json.load(f)
+                    logger.info(f"Loaded fishing grounds GeoJSON for year {year}")
+                except Exception as e:
+                    logger.error(f"Error loading fishing grounds GeoJSON for year {year}: {e}")
+
+            # Build path to boat detections CSV
+            boat_csv_path = os.path.join(
+                os.path.dirname(os.path.dirname(os.path.dirname(__file__))),
+                "data",
+                "outputs",
+                "historical",
+                "phl",
+                str(year),
+                "intermediate",
+                f"df_all_b_phl_{year}.csv",
+            )
+
+            if os.path.exists(boat_csv_path):
+                boat_detections_path = boat_csv_path
+                logger.info(f"Found boat detections CSV for year {year}")
+
+            dashboard_data = {
+                "typhoons": typhoons,
+                "fishing_grounds_geojson": fishing_grounds_geojson,
+                "boat_detections_csv_path": boat_detections_path,
+                "latest_year": year,
+            }
 
             logger.info(f"Dashboard data prepared for year {year}")
             return dashboard_data
         except Exception as e:
             logger.error(f"Error preparing dashboard data for year {year}: {e}")
-            return {"typhoons": {}, "fishing_grounds": []}
+            return {
+                "typhoons": {},
+                "fishing_grounds_geojson": None,
+                "boat_detections_csv_path": None,
+                "latest_year": year,
+            }
 
     def run_historical_analysis(self, country: str, year: int, overwrite: bool = False) -> dict[str, Any]:
         """Start historical analysis processing.

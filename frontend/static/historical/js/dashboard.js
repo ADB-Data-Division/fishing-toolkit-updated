@@ -7,6 +7,10 @@ class TyphoonDashboard {
         this.charts = {};
         this.typhoonData = {}; // Will be populated from API
         this.fishingGrounds = []; // Will be populated from API
+        this.fishingGroundsGeoJSON = null; // GeoJSON polygon data
+        this.fishingGroundLayers = []; // Store polygon layers for reference
+        this.boatDetectionsLayer = null; // Store boat detections layer
+        this.boatDetectionsVisible = true; // Toggle visibility
 
         this.init();
     }
@@ -70,14 +74,26 @@ class TyphoonDashboard {
 
                 if (dashboardData && dashboardData.typhoons && Object.keys(dashboardData.typhoons).length > 0) {
                     this.typhoonData = dashboardData.typhoons;
-                    this.fishingGrounds = dashboardData.fishing_grounds;
+                    this.fishingGrounds = dashboardData.fishing_grounds || [];
+                    this.fishingGroundsGeoJSON = dashboardData.fishing_grounds_geojson;
+                    this.currentYear = dashboardData.latest_year;
 
                     console.log(`Loaded ${Object.keys(this.typhoonData).length} typhoons`);
+                    if (this.fishingGroundsGeoJSON) {
+                        console.log(`Loaded fishing grounds GeoJSON with ${this.fishingGroundsGeoJSON.features.length} polygons`);
+                    }
+
+                    // Load boat detections for the year
+                    if (this.currentYear && window.pywebview.api.get_boat_detections_geojson) {
+                        this.loadBoatDetections(this.currentYear);
+                    }
+
                     return; // Success, exit the retry loop
                 } else {
                     console.warn('No typhoon data available from API');
                     this.typhoonData = {};
                     this.fishingGrounds = [];
+                    this.fishingGroundsGeoJSON = null;
                     return;
                 }
 
@@ -87,6 +103,7 @@ class TyphoonDashboard {
                     console.error('All attempts failed, setting empty data');
                     this.typhoonData = {};
                     this.fishingGrounds = [];
+                    this.fishingGroundsGeoJSON = null;
                     return;
                 }
                 await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1 second before retry
@@ -142,8 +159,55 @@ class TyphoonDashboard {
             attribution: '© OpenStreetMap contributors'
         }).addTo(this.map);
 
-        // Add fishing grounds from API data
-        if (this.fishingGrounds && this.fishingGrounds.length > 0) {
+        // Add fishing grounds from GeoJSON data if available
+        if (this.fishingGroundsGeoJSON && this.fishingGroundsGeoJSON.features) {
+            console.log('Rendering fishing ground polygons');
+
+            this.fishingGroundsGeoJSON.features.forEach(feature => {
+                const contourId = feature.properties.contour_id;
+
+                // Create polygon layer
+                const layer = L.geoJSON(feature, {
+                    style: {
+                        fillColor: '#4fc3d7',
+                        color: '#ffffff',
+                        weight: 2,
+                        opacity: 1,
+                        fillOpacity: 0.20
+                    },
+                    onEachFeature: (feature, layer) => {
+                        // Calculate center of polygon for label
+                        const bounds = layer.getBounds();
+                        const center = bounds.getCenter();
+
+                        // Add popup
+                        layer.bindPopup(`
+                            <div class="typhoon-popup">
+                                <h4>Ground ${contourId}</h4>
+                                <p><span class="popup-label">Center:</span> ${center.lat.toFixed(2)}°, ${center.lng.toFixed(2)}°</p>
+                            </div>
+                        `);
+
+                        // Add hover effect
+                        layer.on('mouseover', function() {
+                            this.setStyle({
+                                fillOpacity: 0.5
+                            });
+                        });
+
+                        layer.on('mouseout', function() {
+                            this.setStyle({
+                                fillOpacity: 0.20
+                            });
+                        });
+                    }
+                }).addTo(this.map);
+
+                this.fishingGroundLayers.push(layer);
+            });
+        } else if (this.fishingGrounds && this.fishingGrounds.length > 0) {
+            // Fallback to old circle marker rendering if GeoJSON not available
+            console.log('Rendering fishing ground circle markers (fallback)');
             this.fishingGrounds.forEach(ground => {
                 L.circleMarker([ground.lat, ground.lng], {
                     radius: 8,
@@ -160,9 +224,6 @@ class TyphoonDashboard {
                 `);
             });
         }
-
-        // Note: Boat detection areas could be added here if available from API
-        // For now, we'll skip this as it's not part of the current data structure
     }
 
     createCharts() {
@@ -437,13 +498,25 @@ class TyphoonDashboard {
 
             if (dashboardData && dashboardData.typhoons) {
                 this.typhoonData = dashboardData.typhoons;
-                this.fishingGrounds = dashboardData.fishing_grounds;
+                this.fishingGrounds = dashboardData.fishing_grounds || [];
+                this.fishingGroundsGeoJSON = dashboardData.fishing_grounds_geojson;
 
                 // Update current year and map header
                 this.currentYear = year;
                 this.updateMapHeader();
 
                 console.log(`Loaded ${Object.keys(this.typhoonData).length} typhoons for year ${year}`);
+                if (this.fishingGroundsGeoJSON) {
+                    console.log(`Loaded fishing grounds GeoJSON with ${this.fishingGroundsGeoJSON.features.length} polygons for year ${year}`);
+                }
+
+                // Redraw map with new fishing grounds
+                this.updateMapFishingGrounds();
+
+                // Load boat detections for the new year
+                if (window.pywebview.api.get_boat_detections_geojson) {
+                    this.loadBoatDetections(year);
+                }
 
                 // Update typhoon selector
                 this.populateTyphoonSelector();
@@ -467,6 +540,138 @@ class TyphoonDashboard {
             }
         } catch (error) {
             console.error(`Error loading typhoons for year ${year}:`, error);
+        }
+    }
+
+    updateMapFishingGrounds() {
+        if (!this.map) return;
+
+        // Clear existing fishing ground layers
+        this.fishingGroundLayers.forEach(layer => {
+            this.map.removeLayer(layer);
+        });
+        this.fishingGroundLayers = [];
+
+        // Add new fishing grounds from GeoJSON data if available
+        if (this.fishingGroundsGeoJSON && this.fishingGroundsGeoJSON.features) {
+            console.log('Updating fishing ground polygons');
+
+            this.fishingGroundsGeoJSON.features.forEach(feature => {
+                const contourId = feature.properties.contour_id;
+
+                // Create polygon layer
+                const layer = L.geoJSON(feature, {
+                    style: {
+                        fillColor: '#4fc3d7',
+                        color: '#ffffff',
+                        weight: 2,
+                        opacity: 1,
+                        fillOpacity: 0.20
+                    },
+                    onEachFeature: (feature, layer) => {
+                        // Calculate center of polygon for label
+                        const bounds = layer.getBounds();
+                        const center = bounds.getCenter();
+
+                        // Add popup
+                        layer.bindPopup(`
+                            <div class="typhoon-popup">
+                                <h4>Ground ${contourId}</h4>
+                                <p><span class="popup-label">Center:</span> ${center.lat.toFixed(2)}°, ${center.lng.toFixed(2)}°</p>
+                            </div>
+                        `);
+
+                        // Add hover effect
+                        layer.on('mouseover', function() {
+                            this.setStyle({
+                                fillOpacity: 0.5
+                            });
+                        });
+
+                        layer.on('mouseout', function() {
+                            this.setStyle({
+                                fillOpacity: 0.20
+                            });
+                        });
+                    }
+                }).addTo(this.map);
+
+                this.fishingGroundLayers.push(layer);
+            });
+        }
+    }
+
+    async loadBoatDetections(year) {
+        try {
+            console.log(`Loading boat detections for year ${year}...`);
+            const boatGeoJSON = await window.pywebview.api.get_boat_detections_geojson(year, 5000);
+
+            if (boatGeoJSON && boatGeoJSON.features) {
+                console.log(`Loaded ${boatGeoJSON.features.length} boat detection points`);
+                this.renderBoatDetections(boatGeoJSON);
+            } else {
+                console.warn(`No boat detections available for year ${year}`);
+            }
+        } catch (error) {
+            console.error(`Error loading boat detections for year ${year}:`, error);
+        }
+    }
+
+    renderBoatDetections(boatGeoJSON) {
+        if (!this.map) return;
+
+        // Remove existing boat layer if any
+        if (this.boatDetectionsLayer) {
+            this.map.removeLayer(this.boatDetectionsLayer);
+        }
+
+        // Create boat detection layer with small purple circles
+        this.boatDetectionsLayer = L.geoJSON(boatGeoJSON, {
+            pointToLayer: (feature, latlng) => {
+                return L.circleMarker(latlng, {
+                    radius: 2,
+                    fillColor: '#9333ea',
+                    color: '#9333ea',
+                    weight: 1,
+                    opacity: 0.6,
+                    fillOpacity: 0.6
+                });
+            },
+            onEachFeature: (feature, layer) => {
+                if (feature.properties.date) {
+                    layer.bindPopup(`
+                        <div class="typhoon-popup">
+                            <h4>Fishing Boat Detection</h4>
+                            <p><span class="popup-label">Date:</span> ${feature.properties.date}</p>
+                        </div>
+                    `);
+                }
+            }
+        });
+
+        // Add to map if visible
+        if (this.boatDetectionsVisible) {
+            this.boatDetectionsLayer.addTo(this.map);
+        }
+
+        console.log('Boat detections rendered on map');
+    }
+
+    toggleBoatDetections() {
+        if (!this.boatDetectionsLayer) return;
+
+        this.boatDetectionsVisible = !this.boatDetectionsVisible;
+
+        if (this.boatDetectionsVisible) {
+            this.boatDetectionsLayer.addTo(this.map);
+        } else {
+            this.map.removeLayer(this.boatDetectionsLayer);
+        }
+
+        // Update toggle button text
+        const toggleBtn = document.getElementById('toggleBoatsBtn');
+        if (toggleBtn) {
+            toggleBtn.textContent = this.boatDetectionsVisible ? 'Hide Boats' : 'Show Boats';
         }
     }
 

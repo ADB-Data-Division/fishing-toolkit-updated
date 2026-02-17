@@ -103,6 +103,29 @@ body {
     transform: translateY(0);
 }
 
+/* View Dashboard Button */
+.view-dashboard-btn {
+    padding: 12px 24px;
+    font-size: 16px;
+    font-weight: normal;
+    border: 2px solid #1e3a8a;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    color: #1e3a8a;
+    background: white;
+}
+
+.view-dashboard-btn:hover {
+    background: #1e3a8a;
+    color: white;
+    transform: translateY(-2px);
+}
+
+.view-dashboard-btn:active {
+    transform: translateY(0);
+}
+
 .footer {
     margin-top: 60px;
     padding-top: 0;

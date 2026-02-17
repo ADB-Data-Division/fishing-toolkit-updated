@@ -106,6 +106,15 @@ class CycloneToolkitApp {
             this.showScreen('nowcast-config');
         });
 
+        // View Dashboard buttons on config screens
+        document.getElementById('viewHistoricalDashboardBtn').addEventListener('click', () => {
+            this.viewHistoricalDashboardDirect();
+        });
+
+        document.getElementById('viewNowcastDashboardBtn').addEventListener('click', () => {
+            this.viewNowcastDashboardDirect();
+        });
+
         // Back buttons
         document.getElementById('backToWelcomeBtn').addEventListener('click', () => {
             this.showScreen('welcome');
@@ -1242,6 +1251,68 @@ class CycloneToolkitApp {
 
     exportData() {
         alert('Data export feature - would allow downloading analysis results');
+    }
+
+    /**
+     * View Historical dashboard directly
+     */
+    async viewHistoricalDashboardDirect() {
+        console.log('Loading historical dashboard...');
+
+        if (!this.api || !this.api.get_historical_dashboard_data) {
+            console.warn('API not available');
+            alert('API not available. Please try again.');
+            return;
+        }
+
+        try {
+            // Check if there's any historical data using explicit method
+            const historicalData = await this.api.get_historical_dashboard_data();
+            console.log('Historical data:', historicalData);
+
+            if (!historicalData || !historicalData.typhoons || Object.keys(historicalData.typhoons).length === 0) {
+                alert('No historical dashboard data available yet. Please run an analysis first.');
+                return;
+            }
+
+            // Set mode and load the historical dashboard
+            this.currentMode = 'historical';
+            await this.loadHistoricalDashboard();
+        } catch (error) {
+            console.error('Error loading historical dashboard:', error);
+            alert('Error loading dashboard. Please try running an analysis first.');
+        }
+    }
+
+    /**
+     * View Nowcast dashboard directly
+     */
+    async viewNowcastDashboardDirect() {
+        console.log('Loading nowcast dashboard...');
+
+        if (!this.api || !this.api.get_nowcast_dashboard_data) {
+            console.warn('API not available');
+            alert('API not available. Please try again.');
+            return;
+        }
+
+        try {
+            // Check if there's any nowcast data using explicit method
+            const nowcastData = await this.api.get_nowcast_dashboard_data();
+            console.log('Nowcast data:', nowcastData);
+
+            if (!nowcastData || !nowcastData.typhoons || Object.keys(nowcastData.typhoons).length === 0) {
+                alert('No nowcast dashboard data available yet. Please run an analysis first.');
+                return;
+            }
+
+            // Set mode and load the nowcast dashboard
+            this.currentMode = 'nowcast';
+            await this.loadNowcastDashboard();
+        } catch (error) {
+            console.error('Error loading nowcast dashboard:', error);
+            alert('Error loading dashboard. Please try running an analysis first.');
+        }
     }
 
     /**

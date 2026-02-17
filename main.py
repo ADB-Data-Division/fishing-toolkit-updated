@@ -9,6 +9,7 @@ import os
 import threading
 import time
 from datetime import datetime
+from typing import Any
 
 import geopandas as gpd
 import webview
@@ -125,6 +126,18 @@ class CleanAPI:
 
     def upload_cyclone_track(self, file_data: str, filename: str):
         return self.__api.upload_cyclone_track(file_data, filename)
+
+    def get_latest_dashboard_mode(self):
+        return self.__api.get_latest_dashboard_mode()
+
+    def get_historical_dashboard_data(self):
+        return self.__api.get_historical_dashboard_data()
+
+    def get_nowcast_dashboard_data(self):
+        return self.__api.get_nowcast_dashboard_data()
+
+    def get_boat_detections_geojson(self, year: int, sample_size: int = 5000):
+        return self.__api.get_boat_detections_geojson(year, sample_size)
 
     def set_window(self, window):
         """Set window reference after window creation - called from main()."""
@@ -679,6 +692,136 @@ class UnifiedApi:
             Full path to the extracted/uploaded shapefile
         """
         return self.nowcast_api.upload_cyclone_track(file_data, filename)
+
+    def get_historical_dashboard_data(self) -> dict[str, Any]:
+        """Get historical dashboard data explicitly.
+
+        Returns:
+            Dictionary with typhoons and fishing_grounds
+        """
+        try:
+            return self.historical_api.get_dashboard_data()
+        except Exception as e:
+            logger.error(f"Error getting historical dashboard data: {e}")
+            return {"typhoons": {}, "fishing_grounds": []}
+
+    def get_nowcast_dashboard_data(self) -> dict[str, Any]:
+        """Get nowcast dashboard data explicitly.
+
+        Returns:
+            Dictionary with typhoons and fishing_grounds
+        """
+        try:
+            return self.nowcast_api.get_dashboard_data()
+        except Exception as e:
+            logger.error(f"Error getting nowcast dashboard data: {e}")
+            return {"typhoons": {}, "fishing_grounds": []}
+
+    def get_boat_detections_geojson(self, year: int, sample_size: int = 5000) -> dict[str, Any] | None:
+        """Load boat detection points as GeoJSON.
+
+        Args:
+            year: Year to load data for
+            sample_size: Number of points to sample (default 5000)
+
+        Returns:
+            GeoJSON FeatureCollection or None
+        """
+        try:
+            return self.historical_api.get_boat_detections_geojson(year, sample_size)
+        except Exception as e:
+            logger.error(f"Error getting boat detections GeoJSON: {e}")
+            return None
+
+    def get_latest_dashboard_mode(self) -> dict[str, Any]:
+        """Determine which mode has the most recent data.
+
+        Returns:
+            Dictionary with 'mode' (str), 'has_data' (bool), and 'timestamp' (str)
+        """
+        try:
+            from datetime import datetime
+
+            latest_mode = None
+            latest_timestamp = None
+            has_data = False
+
+            # Check nowcast database - get full typhoon records
+            try:
+                # Use get_typhoon_list which returns full records with created_at
+                nowcast_typhoons = self.nowcast_api.repository.get_all()
+                logger.info(f"Nowcast has {len(nowcast_typhoons)} typhoons")
+                if nowcast_typhoons:
+                    # Find the most recent typhoon based on created_at timestamp
+                    most_recent = None
+                    for typhoon in nowcast_typhoons:
+                        created_at = typhoon.get("created_at", "")
+                        if created_at:
+                            try:
+                                dt = datetime.fromisoformat(created_at)
+                                if most_recent is None or dt > most_recent:
+                                    most_recent = dt
+                            except (ValueError, TypeError) as e:
+                                logger.warning(f"Error parsing nowcast date {created_at}: {e}")
+
+                    if most_recent:
+                        latest_mode = "nowcast"
+                        latest_timestamp = most_recent
+                        has_data = True
+                        logger.info(f"Nowcast has data with latest timestamp: {latest_timestamp}")
+            except Exception as e:
+                logger.warning(f"Error checking nowcast data: {e}")
+                import traceback
+
+                traceback.print_exc()
+
+            # Check historical database - get full typhoon records
+            try:
+                # Use repository directly to get full records with created_at
+                historical_typhoons = self.historical_api.repository.get_all()
+                logger.info(f"Historical has {len(historical_typhoons)} typhoons")
+                if historical_typhoons:
+                    # Find the most recent typhoon based on created_at timestamp
+                    most_recent = None
+                    for typhoon in historical_typhoons:
+                        created_at = typhoon.get("created_at", "")
+                        if created_at:
+                            try:
+                                dt = datetime.fromisoformat(created_at)
+                                if most_recent is None or dt > most_recent:
+                                    most_recent = dt
+                            except (ValueError, TypeError) as e:
+                                logger.warning(f"Error parsing historical date {created_at}: {e}")
+
+                    if most_recent:
+                        # Compare with nowcast timestamp
+                        if latest_timestamp is None or most_recent > latest_timestamp:
+                            latest_mode = "historical"
+                            latest_timestamp = most_recent
+                            has_data = True
+                            logger.info(f"Historical has newer data with latest timestamp: {latest_timestamp}")
+            except Exception as e:
+                logger.warning(f"Error checking historical data: {e}")
+                import traceback
+
+                traceback.print_exc()
+
+            # Return result
+            result = {
+                "mode": latest_mode if latest_mode else "historical",  # Default to historical if no data
+                "has_data": has_data,
+                "timestamp": latest_timestamp.isoformat() if latest_timestamp else None,
+            }
+            logger.info(f"Latest dashboard mode result: {result}")
+            return result
+
+        except Exception as e:
+            logger.error(f"Error determining latest dashboard mode: {e}")
+            import traceback
+
+            traceback.print_exc()
+            # Return default
+            return {"mode": "historical", "has_data": False, "timestamp": None}
 
     def close(self):
         """Clean up resources."""

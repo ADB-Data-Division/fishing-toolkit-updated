@@ -1,5 +1,7 @@
 """Historical typhoon data repository."""
 
+import json
+import os
 from typing import Any
 
 from .base_repository import BaseRepository
@@ -70,16 +72,41 @@ class HistoricalRepository(BaseRepository):
             key = typhoon["name"]
             dashboard_typhoons[key] = typhoon.get("dashboard_data", {})
 
-        # Add fishing grounds data
-        fishing_grounds = [
-            {"name": "Ground 0", "lat": 14.5, "lng": 120.5},
-            {"name": "Ground 1", "lat": 13.5, "lng": 121.5},
-            {"name": "Ground 2", "lat": 12.5, "lng": 122.5},
-            {"name": "Ground 3", "lat": 11.5, "lng": 123.5},
-            {"name": "Ground 4", "lat": 10.5, "lng": 124.5},
-        ]
+        # Try to load fishing grounds from GeoJSON file
+        fishing_grounds_geojson = None
 
-        return {"typhoons": dashboard_typhoons, "fishing_grounds": fishing_grounds}
+        # Get the most recent year from typhoons
+        latest_year = None
+        for typhoon in typhoons:
+            year = typhoon.get("dashboard_data", {}).get("year")
+            if year and (latest_year is None or year > latest_year):
+                latest_year = year
+
+        if latest_year:
+            # Build path to GeoJSON file
+            geojson_path = os.path.join(
+                os.path.dirname(os.path.dirname(os.path.dirname(__file__))),
+                "data",
+                "outputs",
+                "historical",
+                "phl",
+                str(latest_year),
+                "intermediate",
+                f"phl_merged_dense_area_polygons_{latest_year}.geojson",
+            )
+
+            if os.path.exists(geojson_path):
+                try:
+                    with open(geojson_path) as f:
+                        fishing_grounds_geojson = json.load(f)
+                except Exception as e:
+                    print(f"Error loading fishing grounds GeoJSON: {e}")
+
+        return {
+            "typhoons": dashboard_typhoons,
+            "fishing_grounds_geojson": fishing_grounds_geojson,
+            "latest_year": latest_year,
+        }
 
     def get_typhoons_by_year(self, year: int) -> list[dict[str, Any]]:
         """Get all typhoons for a specific year.
